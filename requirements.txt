@@ -13,3 +13,4 @@ psycopg2
 python-dotenv
 networkx
 pyvis
+pgvector
