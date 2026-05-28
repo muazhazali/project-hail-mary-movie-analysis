@@ -1,0 +1,12 @@
+pandas
+numpy
+matplotlib
+plotly
+streamlit
+pysrt
+nltk
+spacy
+transformers
+sentence-transformers
+sqlalchemy
+psycopg2
