@@ -16,3 +16,4 @@ pyvis
 pgvector
 fastapi
 uvicorn
+requests
