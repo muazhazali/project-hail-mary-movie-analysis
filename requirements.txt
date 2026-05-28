@@ -17,3 +17,4 @@ pgvector
 fastapi
 uvicorn
 requests
+opencv-python
