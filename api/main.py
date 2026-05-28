@@ -19,7 +19,7 @@ class SemanticScene(Base):
     minute_window = Column(Integer)
     start_time_str = Column(String)
     text = Column(String)
-    embedding = Column(Vector(384))
+    embedding = Column(Vector(768))  # all-mpnet-base-v2 produces 768-dimensional embeddings
 
 load_dotenv()
 db_host = os.getenv("DB_HOST", "localhost")
@@ -41,7 +41,7 @@ ml_models = {}
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Loading SentenceTransformer model...")
-    ml_models["encoder"] = SentenceTransformer('all-MiniLM-L6-v2')
+    ml_models["encoder"] = SentenceTransformer('all-mpnet-base-v2')
     yield
     # Clean up on shutdown
     ml_models.clear()

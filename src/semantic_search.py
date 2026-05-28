@@ -17,7 +17,7 @@ class SemanticScene(Base):
     minute_window = Column(Integer)
     start_time_str = Column(String)
     text = Column(String)
-    embedding = Column(Vector(384))  # all-MiniLM-L6-v2 produces 384-dimensional embeddings
+    embedding = Column(Vector(768))  # all-mpnet-base-v2 produces 768-dimensional embeddings
 
 def time_to_seconds(t_str):
     try:
@@ -32,6 +32,44 @@ def seconds_to_str(total_sec):
     m = int((total_sec % 3600) // 60)
     s = int(total_sec % 60)
     return f"{h:02d}:{m:02d}:{s:02d}"
+
+def chunk_subtitles_sliding_window(df, chunk_size_words=120, overlap_words=40):
+    chunks = []
+    current_window = []
+    current_words = 0
+    
+    for _, row in df.iterrows():
+        text = str(row['text']) if pd.notna(row['text']) else ""
+        words_in_row = len(text.split())
+        
+        current_window.append(row)
+        current_words += words_in_row
+        
+        if current_words >= chunk_size_words:
+            chunk_text = " ".join([str(r['text']) for r in current_window if pd.notna(r['text'])])
+            start_row = current_window[0]
+            chunks.append({
+                'window_1min': int(start_row['time_sec'] // 60),
+                'start_time_str': start_row['start_time'],
+                'text': chunk_text
+            })
+            
+            # Slide window by dropping from the front until we are within overlap budget
+            while current_words > overlap_words and len(current_window) > 1:
+                removed_row = current_window.pop(0)
+                removed_text = str(removed_row['text']) if pd.notna(removed_row['text']) else ""
+                current_words -= len(removed_text.split())
+                
+    if current_window:
+        chunk_text = " ".join([str(r['text']) for r in current_window if pd.notna(r['text'])])
+        start_row = current_window[0]
+        chunks.append({
+            'window_1min': int(start_row['time_sec'] // 60),
+            'start_time_str': start_row['start_time'],
+            'text': chunk_text
+        })
+        
+    return pd.DataFrame(chunks)
 
 def perform_search(session, query, model, top_k=3):
     print(f"\n--- SEMANTIC SEARCH ---")
@@ -59,24 +97,16 @@ def main():
     df = pd.read_csv(data_path)
     df['time_sec'] = df['start_time'].apply(time_to_seconds)
     
-    # Chunking into 1-minute scenes
-    window_size = 60
-    df['window_1min'] = df['time_sec'] // window_size
-    
-    print("Chunking dialogue into 1-minute scenes...")
-    scenes = df.groupby('window_1min').agg({
-        'text': lambda x: " ".join(x.fillna("").tolist()),
-        'time_sec': 'min'
-    }).reset_index()
-    scenes['start_time_str'] = scenes['time_sec'].apply(seconds_to_str)
+    print("Chunking dialogue using sliding window...")
+    scenes = chunk_subtitles_sliding_window(df, chunk_size_words=120, overlap_words=40)
     
     # Remove empty scenes
     scenes = scenes[scenes['text'].str.strip().str.len() > 0]
     print(f"Total scenes to index: {len(scenes)}")
     
     # 2. Embedding Generation
-    print("Loading sentence-transformers model (all-MiniLM-L6-v2)...")
-    model = SentenceTransformer('all-MiniLM-L6-v2')
+    print("Loading sentence-transformers model (all-mpnet-base-v2)...")
+    model = SentenceTransformer('all-mpnet-base-v2')
     
     print("Encoding scenes into vector embeddings (this might take a moment)...")
     embeddings = model.encode(scenes['text'].tolist())

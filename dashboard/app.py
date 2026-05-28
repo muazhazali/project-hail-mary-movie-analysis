@@ -198,7 +198,7 @@ with tab6:
         if query:
             with st.spinner("Searching database..."):
                 try:
-                    response = requests.get(f"http://localhost:8000/search", params={"q": query, "top_k": top_k})
+                    response = requests.get(f"http://127.0.0.1:8000/search", params={"q": query, "top_k": top_k})
                     if response.status_code == 200:
                         data = response.json()
                         results = data.get("results", [])
@@ -211,6 +211,6 @@ with tab6:
                     else:
                         st.error(f"API Error: {response.text}")
                 except Exception as e:
-                    st.error("Could not connect to FastAPI server. Ensure it is running on http://localhost:8000.")
+                    st.error("Could not connect to FastAPI server. Ensure it is running on http://127.0.0.1:8000.")
         else:
             st.warning("Please enter a query.")
