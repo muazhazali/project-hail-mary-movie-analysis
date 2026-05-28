@@ -99,9 +99,7 @@ def semantic_search(
         for res in results:
             # Calculate similarity score (cosine distance is 0 for identical, 2 for exactly opposite)
             # We convert it to a rough similarity percentage for the API response
-            distance = res.embedding.cosine_distance(query_embedding)
-            # Evaluate using SQLAlchemy to get the float value. Since we don't have the value natively extracted 
-            # easily without a custom select, we just omit the exact score or return the object data.
+            # distance calculation omitted since db handles sorting
             response_data.append({
                 "minute": res.minute_window,
                 "timestamp": res.start_time_str,
