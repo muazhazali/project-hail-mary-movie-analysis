@@ -1,0 +1,12 @@
+.venv/
+.env
+__pycache__/
+*.pyc
+
+# data and outputs
+data/
+outputs/
+*.csv
+
+# misc
+.DS_Store

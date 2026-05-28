@@ -10,3 +10,4 @@ transformers
 sentence-transformers
 sqlalchemy
 psycopg2
+python-dotenv
