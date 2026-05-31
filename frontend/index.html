@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Sentiment Analytics - Project Hail Mary</title>
+    <link rel="stylesheet" href="src/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading sentiment analytics...</p>
+    </div>
+
+    <header class="app-header">
+        <h1>🎬 Project Hail Mary</h1>
+        <p class="subtitle">Multimodal Sentiment Analysis</p>
+        <div class="header-stats">
+            <div class="stat-item">
+                <span class="stat-label">Runtime</span>
+                <span class="stat-value" id="runtime">--</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Scenes</span>
+                <span class="stat-value" id="total-scenes">--</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Dominant Mood</span>
+                <span class="stat-value" id="dominant-mood">--</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Character Focus</span>
+                <span class="stat-value" id="character-focus">--</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <section class="sentiment-meter">
+            <h2>Overall Sentiment</h2>
+            <div class="meter-container">
+                <div class="meter">
+                    <div class="meter-fill" id="sentiment-fill" style="width: 50%"></div>
+                </div>
+                <div class="meter-labels">
+                    <span>Negative</span>
+                    <span>Positive</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="themes-section">
+            <h2>Themes</h2>
+            <div id="themes-list" class="themes-list"></div>
+        </section>
+
+        <section class="timeline-section">
+            <h2>Emotional Timeline</h2>
+            <div class="timeline-filters">
+                <button class="filter-btn active" id="filter-all">All</button>
+                <button class="filter-btn" id="filter-joy">Joy</button>
+                <button class="filter-btn" id="filter-tension">Tension</button>
+                <button class="filter-btn" id="filter-grief">Grief</button>
+                <button class="filter-btn" id="filter-climax">Climax</button>
+            </div>
+            <div class="timeline-chart-container">
+                <canvas id="timeline-chart"></canvas>
+            </div>
+            <div id="timeline" class="timeline"></div>
+        </section>
+
+        <section class="scenes-section">
+            <h2>Scene Breakdown</h2>
+            <div id="scenes-grid" class="scenes-grid"></div>
+        </section>
+
+        <section class="analysis-section">
+            <h2>Deep Analysis</h2>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="characters">Characters</button>
+                <button class="tab-btn" data-tab="themes-evolution">Themes</button>
+                <button class="tab-btn" data-tab="mood-shifts">Mood Shifts</button>
+            </div>
+            <div class="tab-content active" id="characters">
+                <div id="character-viz" class="character-viz"></div>
+            </div>
+            <div class="tab-content" id="themes-evolution">
+                <div class="theme-chart-container">
+                    <canvas id="theme-chart"></canvas>
+                </div>
+            </div>
+            <div class="tab-content" id="mood-shifts">
+                <div id="mood-shifts-content"></div>
+            </div>
+        </section>
+    </main>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span id="close-modal" class="close-btn">&times;</span>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script src="src/app.js"></script>
+</body>
+</html>
