@@ -1,0 +1,17 @@
+[project]
+name = "project-hail-mary-movie-analysis"
+version = "0.1.0"
+description = "Analysis pipeline + Streamlit dashboard for Project Hail Mary movie subtitles"
+requires-python = ">=3.11"
+dependencies = [
+    "streamlit>=1.38",
+    "plotly>=5.24",
+    "vaderSentiment>=3.3",
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+enrich = [
+    "openai>=1.0",
+    "anthropic>=0.20",
+]

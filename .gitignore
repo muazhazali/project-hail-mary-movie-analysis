@@ -2,11 +2,15 @@
 .env
 __pycache__/
 *.pyc
+uv.lock
 
 # data and outputs
 data/
 outputs/
 *.csv
+
+# streamlit
+.streamlit/secrets.toml
 
 # misc
 .DS_Store

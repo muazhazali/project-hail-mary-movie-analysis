@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: project-hail-mary-movie-analysis
+Version: 0.1.0
+Summary: Analysis pipeline + Streamlit dashboard for Project Hail Mary movie subtitles
+Requires-Python: >=3.11
+Requires-Dist: streamlit>=1.38
+Requires-Dist: plotly>=5.24
+Requires-Dist: vaderSentiment>=3.3
+Requires-Dist: numpy>=1.26
+Provides-Extra: enrich
+Requires-Dist: openai>=1.0; extra == "enrich"
+Requires-Dist: anthropic>=0.20; extra == "enrich"

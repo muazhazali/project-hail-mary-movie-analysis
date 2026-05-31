@@ -1,0 +1,7 @@
+README.md
+pyproject.toml
+project_hail_mary_movie_analysis.egg-info/PKG-INFO
+project_hail_mary_movie_analysis.egg-info/SOURCES.txt
+project_hail_mary_movie_analysis.egg-info/dependency_links.txt
+project_hail_mary_movie_analysis.egg-info/requires.txt
+project_hail_mary_movie_analysis.egg-info/top_level.txt
