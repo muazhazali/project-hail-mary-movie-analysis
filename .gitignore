@@ -3,6 +3,8 @@
 __pycache__/
 *.pyc
 uv.lock
+node_modules/
+dist/
 
 # data and outputs
 data/
