@@ -1,0 +1,22 @@
+Metadata-Version: 2.4
+Name: project-hail-mary-analysis
+Version: 0.1.0
+Summary: Subtitle NLP dashboard for Project Hail Mary
+License: MIT
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi>=0.115.0
+Requires-Dist: uvicorn[standard]>=0.32.0
+Requires-Dist: pydantic>=2.9.0
+Requires-Dist: pydantic-settings>=2.6.0
+Requires-Dist: sqlalchemy>=2.0.36
+Requires-Dist: psycopg2-binary>=2.9.10
+Requires-Dist: pgvector>=0.4.0
+Requires-Dist: python-dotenv>=1.0.1
+Requires-Dist: sentence-transformers>=3.3.0
+Requires-Dist: vaderSentiment>=3.3.2
+Requires-Dist: spacy>=3.8.0
+Requires-Dist: numpy>=1.26.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.3; extra == "dev"
+Requires-Dist: httpx>=0.28.0; extra == "dev"

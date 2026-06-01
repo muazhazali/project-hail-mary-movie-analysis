@@ -1,12 +1,17 @@
-FROM node:20 AS build
+FROM node:20-slim AS build
+
+# Enable corepack for pnpm
+RUN corepack enable && corepack prepare pnpm@10.29.2 --activate
 
 WORKDIR /app
-COPY package.json ./
-RUN npm install
+
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 COPY . .
-RUN npm run build
+RUN pnpm run build
 
+# Nginx production stage
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf

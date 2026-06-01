@@ -1,7 +1,7 @@
 import datetime
-import os
+from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -12,18 +12,23 @@ from app.routers import subtitles, search, analytics
 
 settings = get_settings()
 
-# Create tables on startup
-Base.metadata.create_all(bind=engine)
 
-# Ensure pgvector extension exists
-with SessionLocal() as db:
-    db.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-    db.commit()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: create tables and ensure pgvector extension
+    Base.metadata.create_all(bind=engine)
+    with SessionLocal() as db:
+        db.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        db.commit()
+    yield
+    # Shutdown: nothing special
+
 
 app = FastAPI(
     title="Project Hail Mary Subtitle Analysis",
     description="NLP + vector semantic search dashboard for movie subtitles",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
