@@ -25,6 +25,28 @@ class Settings(BaseSettings):
 
     embedding_model: str = "all-MiniLM-L6-v2"
 
+    # Qdrant settings
+    # For local Qdrant (host/port mode):
+    qdrant_host: str = "localhost"
+    qdrant_port: int = 6333
+    # For cloud Qdrant (URL mode) - URL format (e.g., https://qdrant.example.com)
+    # Note: If qdrant_url is set, it takes precedence over host/port
+    qdrant_url: str | None = None
+    qdrant_api_key: str | None = None
+    qdrant_collection: str = "subtitle_lines"
+    qdrant_vector_size: int = 384  # all-MiniLM-L6-v2 produces 384-dim vectors
+    
+    @property
+    def qdrant_effective_url(self) -> str | None:
+        """Get effective Qdrant URL. Checks QDRANT_URL first, then QDRANT_HOST."""
+        # First check if explicit URL is set
+        if self.qdrant_url and len(self.qdrant_url) > 0:
+            return self.qdrant_url
+        # Then check if qdrant_host looks like a URL (starts with http)
+        if self.qdrant_host.startswith(("http://", "https://")):
+            return self.qdrant_host
+        return None
+
     @property
     def database_url(self) -> str:
         return f"postgresql://{self.db_user}:{self.db_pass}@{self.db_host}:{self.db_port}/{self.db_name}"

@@ -1,3 +1,4 @@
+"""Seed script to ingest SRT and populate PostgreSQL + Qdrant."""
 import os
 from collections import defaultdict
 from dotenv import load_dotenv
@@ -12,16 +13,27 @@ from app.models import SubtitleLine, SpeakerStat
 from app.services.srt_parser import parse_srt, clean_text, classify_line, extract_speaker
 from app.services.nlp import analyze_sentiment, count_words, compute_wpm, extract_entities, vocabulary_stats
 from app.services.embedding import embed_texts
+from app.services.qdrant_service import ensure_collection, upsert_embeddings, count_points
 
 
 def ingest(srt_path: str) -> None:
     Base.metadata.create_all(bind=engine)
+    ensure_collection()  # Ensure Qdrant collection exists
 
     db: Session = SessionLocal()
     try:
-        if db.query(SubtitleLine).count() > 0:
-            print("SubtitleLine table already has data. Skipping ingestion.")
+        # Check if already seeded
+        pg_count = db.query(SubtitleLine).count()
+        qdrant_count = count_points()
+        
+        if pg_count > 0 and qdrant_count > 0:
+            print("Database already seeded (PostgreSQL + Qdrant). Skipping ingestion.")
             return
+        
+        if pg_count > 0 and qdrant_count == 0:
+            print("WARNING: PostgreSQL has data but Qdrant is empty. Re-seeding Qdrant only...")
+            # TODO: Could add logic here to re-populate Qdrant from existing PG data
+            pass
 
         print(f"Reading subtitle file: {srt_path}")
         with open(srt_path, "r", encoding="utf-8") as f:
@@ -58,7 +70,7 @@ def ingest(srt_path: str) -> None:
                 b["embedding"] = emb
             print(f"  Embedded batch {i//batch_size + 1}/{(len(enriched)-1)//batch_size + 1}")
 
-        print("Inserting into database...")
+        print("Inserting into PostgreSQL...")
         for b in enriched:
             entry = b["entry"]
             line = SubtitleLine(
@@ -76,11 +88,27 @@ def ingest(srt_path: str) -> None:
                 sentiment_neg=b["sentiment"]["neg"],
                 word_count=b["word_count"],
                 words_per_minute=b["wpm"],
-                embedding=b["embedding"],
+                # Note: embedding now stored in Qdrant, not PostgreSQL
             )
             db.add(line)
         db.commit()
-        print(f"Inserted {len(enriched)} subtitle lines")
+        print(f"Inserted {len(enriched)} subtitle lines into PostgreSQL")
+
+        print("Inserting into Qdrant...")
+        ids = [b["entry"].idx for b in enriched]
+        embeddings = [b["embedding"] for b in enriched]
+        payloads = [
+            {
+                "idx": b["entry"].idx,
+                "speaker": b["speaker"],
+                "clean_text": b["cleaned"],
+                "start_time": b["entry"].start_time,
+                "end_time": b["entry"].end_time,
+            }
+            for b in enriched
+        ]
+        upsert_embeddings(ids, embeddings, payloads)
+        print(f"Inserted {len(enriched)} embeddings into Qdrant")
 
         print("Computing speaker stats...")
         speaker_lines = defaultdict(list)

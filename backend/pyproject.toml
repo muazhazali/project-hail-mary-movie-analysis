@@ -3,7 +3,6 @@ name = "project-hail-mary-analysis"
 version = "0.1.0"
 description = "Subtitle NLP dashboard for Project Hail Mary"
 requires-python = ">=3.11"
-readme = "../README.md"
 license = { text = "MIT" }
 dependencies = [
     "fastapi>=0.115.0",
@@ -12,12 +11,12 @@ dependencies = [
     "pydantic-settings>=2.6.0",
     "sqlalchemy>=2.0.36",
     "psycopg2-binary>=2.9.10",
-    "pgvector>=0.4.0",
     "python-dotenv>=1.0.1",
     "sentence-transformers>=3.3.0",
     "vaderSentiment>=3.3.2",
     "spacy>=3.8.0",
     "numpy>=1.26.0",
+    "qdrant-client>=1.9.0",
 ]
 
 [project.optional-dependencies]

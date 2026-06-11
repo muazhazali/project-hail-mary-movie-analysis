@@ -3,23 +3,20 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
-from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.database import engine, Base, SessionLocal
+from app.database import engine, Base
 from app.routers import subtitles, search, analytics
+from app.services.qdrant_service import ensure_collection
 
 settings = get_settings()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: create tables and ensure pgvector extension
+    # Startup: create PostgreSQL tables and ensure Qdrant collection
     Base.metadata.create_all(bind=engine)
-    with SessionLocal() as db:
-        db.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-        db.commit()
+    ensure_collection()
     yield
     # Shutdown: nothing special
 

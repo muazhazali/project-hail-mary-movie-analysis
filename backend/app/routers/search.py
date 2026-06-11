@@ -1,12 +1,11 @@
-import json
-
+"""Search routers using Qdrant for semantic search."""
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import text
 
 from app.database import get_db
 from app.models import SubtitleLine
 from app.services.embedding import embed_query
+from app.services.qdrant_service import search_similar
 from app.schemas import SearchQuery, SearchResult
 
 router = APIRouter(prefix="/api/search", tags=["search"])
@@ -19,44 +18,47 @@ def semantic_search(
     speaker: str | None = None,
     db: Session = Depends(get_db),
 ):
+    """Semantic search using Qdrant vector similarity."""
     if not q or len(q.strip()) < 1:
         raise HTTPException(status_code=400, detail="Query cannot be empty")
     
     query_embedding = embed_query(q.strip())
-    # pgvector cosine similarity operator <=> (1 - cosine_distance)
-    # We want top by cosine similarity, so order by embedding <=> query_embedding
-    # pgvector <=> returns cosine distance, so smaller = more similar.
-    speaker_filter = ""
-    params = {"embedding": json.dumps(query_embedding), "limit": limit}
-    if speaker:
-        speaker_filter = " AND speaker = :speaker"
-        params["speaker"] = speaker
     
-    sql = f"""
-        SELECT idx, start_time, end_time, raw_text, clean_text, speaker,
-               sentiment_compound,
-               embedding <=> (:embedding)::vector AS distance
-        FROM subtitle_lines
-        WHERE embedding IS NOT NULL {speaker_filter}
-        ORDER BY embedding <=> (:embedding)::vector ASC
-        LIMIT :limit
-    """
-    rows = db.execute(text(sql), params).mappings().all()
+    # Search in Qdrant
+    qdrant_results = search_similar(
+        query_vector=query_embedding,
+        limit=limit,
+        speaker=speaker,
+    )
+    
+    # Get idx values from Qdrant results
+    idxs = [r["id"] for r in qdrant_results]
+    
+    if not idxs:
+        return {"query": q, "results": []}
+    
+    # Fetch full records from PostgreSQL
+    subtitle_lines = db.query(SubtitleLine).filter(SubtitleLine.idx.in_(idxs)).all()
+    
+    # Create lookup by idx for ordering
+    lines_by_idx = {line.idx: line for line in subtitle_lines}
     
     results = []
-    for row in rows:
-        # convert distance to similarity (1 - distance for cosine)
-        similarity = 1.0 - float(row["distance"])
-        results.append(SearchResult(
-            idx=row["idx"],
-            start_time=row["start_time"],
-            end_time=row["end_time"],
-            raw_text=row["raw_text"],
-            clean_text=row["clean_text"],
-            speaker=row["speaker"],
-            similarity=round(similarity, 4),
-            sentiment_compound=row["sentiment_compound"],
-        ))
+    for qr in qdrant_results:
+        idx = qr["id"]
+        line = lines_by_idx.get(idx)
+        if line:
+            results.append(SearchResult(
+                idx=line.idx,
+                start_time=line.start_time,
+                end_time=line.end_time,
+                raw_text=line.raw_text,
+                clean_text=line.clean_text,
+                speaker=line.speaker,
+                similarity=round(qr["score"], 4),  # Qdrant returns cosine similarity directly
+                sentiment_compound=line.sentiment_compound,
+            ))
+    
     return {"query": q, "results": results}
 
 
@@ -67,6 +69,7 @@ def text_search(
     speaker: str | None = None,
     db: Session = Depends(get_db),
 ):
+    """Text/keyword search using PostgreSQL ILIKE."""
     if not q or len(q.strip()) < 1:
         raise HTTPException(status_code=400, detail="Query cannot be empty")
     

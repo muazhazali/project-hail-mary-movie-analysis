@@ -1,7 +1,6 @@
 import datetime
 from typing import Optional
 
-from pgvector.sqlalchemy import Vector
 from sqlalchemy import Integer, String, Float, DateTime, Text, Index, func
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -26,7 +25,7 @@ class SubtitleLine(Base):
     sentiment_neg: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     word_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     words_per_minute: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    embedding: Mapped[Optional[list[float]]] = mapped_column(Vector(384), nullable=True)
+    # Embeddings now stored in Qdrant (not PostgreSQL)
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

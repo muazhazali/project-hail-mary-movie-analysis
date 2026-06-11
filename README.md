@@ -1,14 +1,14 @@
 # Project Hail Mary — Subtitle Intelligence Dashboard
 
-NLP + vector semantic search dashboard that ingests a movie subtitle (SRT) file, computes sentiment, word stats, speaker analytics, and vector embeddings — then lets you explore and search everything through a sci-fi themed React dashboard backed by FastAPI and PostgreSQL with pgvector.
+NLP + vector semantic search dashboard that ingests a movie subtitle (SRT) file, computes sentiment, word stats, speaker analytics, and vector embeddings — then lets you explore and search everything through a sci-fi themed React dashboard backed by FastAPI, PostgreSQL, and Qdrant.
 
 ---
 
 ## Tech Stack
 
-- **Backend (Python / uv)**: FastAPI, SQLAlchemy 2.0, Pydantic 2.x, psycopg2, pgvector, sentence-transformers, spaCy, VADER
+- **Backend (Python / uv)**: FastAPI, SQLAlchemy 2.0, Pydantic 2.x, psycopg2, qdrant-client, sentence-transformers, spaCy, VADER
 - **Frontend (Node / pnpm)**: React 18, Vite, Tailwind CSS, Recharts, React Router
-- **Database**: PostgreSQL 16 with the **pgvector** extension
+- **Database**: PostgreSQL 16 (structured data), Qdrant (vector embeddings)
 
 ---
 
@@ -18,7 +18,8 @@ NLP + vector semantic search dashboard that ingests a movie subtitle (SRT) file,
 - **uv** (install: https://docs.astral.sh/uv/getting-started/installation/)
 - **Node** (v20+)
 - **pnpm** (install: `corepack enable && corepack prepare pnpm --activate`, or via npm: `npm install -g pnpm`)
-- **PostgreSQL** (local dev) or a remote Postgres with **pgvector** enabled
+- **PostgreSQL 16** (structured data)
+- **Qdrant** (vector embeddings) - local via Docker or cloud
 
 ---
 
